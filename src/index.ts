@@ -134,7 +134,7 @@ app.get('/api/v1/brain/:shareLink', async (req, res) => {
   const hash = req.params.shareLink;
 
   const link = await LinkModel.findOne({
-    hash: hash,
+    hash,
   });
 
   if (!link) {
@@ -143,17 +143,25 @@ app.get('/api/v1/brain/:shareLink', async (req, res) => {
     });
     return;
   }
-
+  // userId
   const content = await ContentModel.find({
     userId: link.userId,
   });
 
+  console.log(link);
   const user = await UserModel.findOne({
-    userId: link.userId,
+    _id: link.userId,
   });
 
+  if (!user) {
+    res.status(411).json({
+      message: 'user not found, error should ideally not happen',
+    });
+    return;
+  }
+
   res.json({
-    username: user?.username,
+    username: user.username,
     content: content,
   });
 });

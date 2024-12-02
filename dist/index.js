@@ -100,19 +100,32 @@ app.delete('/api/v1/content', middleware_1.userMiddleware, (req, res) => __await
 app.post('/api/v1/brain/share', middleware_1.userMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const share = req.body.share;
     if (share) {
+        const existingLink = yield db_1.LinkModel.findOne({
+            userId: req.userId,
+        });
+        if (existingLink) {
+            res.json({
+                hash: existingLink.hash,
+            });
+            return;
+        }
+        const hash = (0, utils_1.random)(10);
         yield db_1.LinkModel.create({
             userId: req.userId,
-            hash: (0, utils_1.random)(10),
+            hash: hash,
+        });
+        res.json({
+            hash,
         });
     }
     else {
         yield db_1.LinkModel.deleteOne({
             userId: req.userId,
         });
+        res.json({
+            message: 'Removed link',
+        });
     }
-    res.json({
-        message: 'updated sharable link',
-    });
 }));
 app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const hash = req.params.shareLink;
@@ -126,7 +139,7 @@ app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void
         return;
     }
     const content = yield db_1.ContentModel.find({
-        userId: link.userId,
+        _id: link.userId,
     });
     const user = yield db_1.UserModel.findOne({
         userId: link.userId,
