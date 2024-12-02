@@ -18,6 +18,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const db_1 = require("./db");
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
+const utils_1 = require("./utils");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
 mongoose_1.default.connect('mongodb://localhost:27017/recallDB');
@@ -101,7 +102,7 @@ app.post('/api/v1/brain/share', middleware_1.userMiddleware, (req, res) => __awa
     if (share) {
         yield db_1.LinkModel.create({
             userId: req.userId,
-            hash: hash,
+            hash: (0, utils_1.random)(10),
         });
     }
     else {
@@ -113,5 +114,26 @@ app.post('/api/v1/brain/share', middleware_1.userMiddleware, (req, res) => __awa
         message: 'updated sharable link',
     });
 }));
-app.get('/api/v1/brain/:shareLink', (req, res) => { });
+app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const hash = req.params.shareLink;
+    const link = yield db_1.LinkModel.findOne({
+        hash: hash,
+    });
+    if (!link) {
+        res.status(411).json({
+            message: 'Sorry incorrect input',
+        });
+        return;
+    }
+    const content = yield db_1.ContentModel.find({
+        userId: link.userId,
+    });
+    const user = yield db_1.UserModel.findOne({
+        userId: link.userId,
+    });
+    res.json({
+        username: user === null || user === void 0 ? void 0 : user.username,
+        content: content,
+    });
+}));
 app.listen(3000);
