@@ -130,7 +130,7 @@ app.post('/api/v1/brain/share', middleware_1.userMiddleware, (req, res) => __awa
 app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const hash = req.params.shareLink;
     const link = yield db_1.LinkModel.findOne({
-        hash: hash,
+        hash,
     });
     if (!link) {
         res.status(411).json({
@@ -138,14 +138,22 @@ app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void
         });
         return;
     }
+    // userId
     const content = yield db_1.ContentModel.find({
-        _id: link.userId,
-    });
-    const user = yield db_1.UserModel.findOne({
         userId: link.userId,
     });
+    console.log(link);
+    const user = yield db_1.UserModel.findOne({
+        _id: link.userId,
+    });
+    if (!user) {
+        res.status(411).json({
+            message: 'user not found, error should ideally not happen',
+        });
+        return;
+    }
     res.json({
-        username: user === null || user === void 0 ? void 0 : user.username,
+        username: user.username,
         content: content,
     });
 }));

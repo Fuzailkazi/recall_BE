@@ -148,7 +148,7 @@ app.get('/api/v1/brain/:shareLink', async (req, res) => {
     userId: link.userId,
   });
 
-  console.log(link);
+  // console.log(link);
   const user = await UserModel.findOne({
     _id: link.userId,
   });
