@@ -19,9 +19,16 @@ const db_1 = require("./db");
 const config_1 = require("./config");
 const middleware_1 = require("./middleware");
 const utils_1 = require("./utils");
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
+app.use((0, cors_1.default)());
 mongoose_1.default.connect('mongodb://localhost:27017/recallDB');
+app.use(function (req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    next();
+});
 app.post('/api/v1/signup', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const username = req.body.username;
     const password = req.body.password;
@@ -30,7 +37,7 @@ app.post('/api/v1/signup', (req, res) => __awaiter(void 0, void 0, void 0, funct
             username: username,
             password: password,
         });
-        res.json({
+        res.status(201).json({
             message: 'User signed up',
         });
     }
@@ -142,7 +149,7 @@ app.get('/api/v1/brain/:shareLink', (req, res) => __awaiter(void 0, void 0, void
     const content = yield db_1.ContentModel.find({
         userId: link.userId,
     });
-    console.log(link);
+    // console.log(link);
     const user = yield db_1.UserModel.findOne({
         _id: link.userId,
     });

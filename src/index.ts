@@ -5,10 +5,20 @@ import { ContentModel, LinkModel, UserModel } from './db';
 import { JWT_PASSWORD } from './config';
 import { userMiddleware } from './middleware';
 import { random } from './utils';
+import cors from 'cors';
 
 const app = express();
 app.use(express.json());
+app.use(cors());
 mongoose.connect('mongodb://localhost:27017/recallDB');
+app.use(function (req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
+  next();
+});
 app.post('/api/v1/signup', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -19,7 +29,7 @@ app.post('/api/v1/signup', async (req, res) => {
       password: password,
     });
 
-    res.json({
+    res.status(201).json({
       message: 'User signed up',
     });
   } catch (e) {
